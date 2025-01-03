@@ -24,7 +24,7 @@ void setup() {
 void loop() {
   for (uint8_t row = 0; row < 8; row++) {
     for (uint8_t col = 0; col < 8; col++) {
-      int readValue = readSquare(row, col);
+      int readValue = boardState.GetSquareState(row, col);
 
       SquareState state;
       if (readValue < minThreshold) {
@@ -41,8 +41,6 @@ void loop() {
 
   boardState.PackTransmitData(packedData);
 }
-
-int readSquare(uint8_t row, uint8_t col) {}
 
 int readMux(int channel) {
   for (int i = 0; i < 4; i++) {

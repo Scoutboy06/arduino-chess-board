@@ -1,3 +1,5 @@
+#include "./globals.h"
+
 enum SquareState {
   None = 0,
   White = 1,
@@ -23,13 +25,70 @@ public:
     }
   }
 
-  void SetSquareState(unsigned int row, unsigned int col, SquareState state);
+  void SetSquareState(unsigned int row, unsigned int col, SquareState state) {
+    if (row < 8 && col < 8) {
+      board[row][col] = state;
+    }
+  }
 
-  SquareState GetSquareState(unsigned int row, unsigned int col);
+  SquareState GetSquareState(unsigned int row, unsigned int col) {
+    return board[row][col];
+  }
 
-  void ResetBoard();
+  void ResetBoard() {
+    for (int row = 0; row < 8; row++) {
+      for (int col = 0; col < 8; col++) {
+        switch (row) {
+        case 0:
+        case 1:
+          board[row][col] = Black;
+          break;
+        case 6:
+        case 7:
+          board[row][col] = White;
+          break;
+        default:
+          board[row][col] = None;
+        }
+      }
+    }
+  }
 
-  void DebugPrint();
+  void DebugPrint() {
+    PRINT("-------------------------\n");
 
-  void PackTransmitData(unsigned char *packedData);
+    for (int row = 0; row < 8; row++) {
+      for (int col = 0; col < 8; col++) {
+        switch (board[row][col]) {
+        case None:
+          PRINT('_');
+          break;
+        case White:
+          PRINT('W');
+          break;
+        case Black:
+          PRINT('b');
+          break;
+        }
+      }
+
+      PRINT('\n');
+    }
+
+    PRINT("-------------------------\n");
+  }
+
+  void PackTransmitData(unsigned char *packedData) {
+    memset(packedData, 0, sizeof(packedData));
+
+    for (int row = 0; row < 8; row++) {
+      for (int col = 0; col < 8; col++) {
+        SquareState val = board[row][col];
+        int byteIndex = row * 2 + (col / 4);
+        int bitOffset = (col % 4) * 2;
+
+        packedData[byteIndex] |= (val << bitOffset);
+      }
+    }
+  }
 };
