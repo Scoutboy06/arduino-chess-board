@@ -4,16 +4,12 @@
 #include "common/BoardState.h"
 #include "common/globals.h"
 
-constexpr int upperThresh = 600;
-constexpr int lowerThresh = 450;
+constexpr int upperThresh = 500;
+constexpr int lowerThresh = 400;
 
-constexpr uint8_t rowPins[] = {2, 3, 4, 5};
-constexpr uint8_t rowReadPin = A0;
-Multiplexer rowMux(rowPins, rowReadPin);
-
-constexpr uint8_t colPins[] = {6, 7, 8, 9};
-constexpr uint8_t colReadPin = A1;
-Multiplexer colMux(colPins, colReadPin);
+Multiplexer vccMux({ A2, A1, A0 });
+Multiplexer gndMux({ 8, 7, 6 });
+Multiplexer sigMux({ 2, 3, 4 }, IN, A7);
 
 BoardState boardState;
 uint8_t packedData[16] = {0};
@@ -21,31 +17,42 @@ uint8_t packedData[16] = {0};
 void setup() {
   Serial.begin(9600);
 
-  rowMux.Setup();
-  colMux.Setup();
+  gndMux.Setup();
+  sigMux.Setup();
+  vccMux.Setup();
 }
 
 void loop() {
-  for (uint8_t row = 0; row < 8; row++) {
-    for (uint8_t col = 0; col < 8; col++) {
+  for (int8_t row = 7; row >= 0; --row) {
+    for (int8_t col = 0; col < 8; ++col) {
       SquareState s = ReadSquare(row, col);
-      boardState.SetSquareState(row, col, s);
+      // boardState.SetSquareState(7 - row, col, s);
+      delay(500);
     }
+    PRINT('\n');
   }
+  PRINT('\n');
 
-  boardState.PackTransmitData(packedData);
+  // boardState.PackTransmitData(packedData);
+  // boardState.DebugPrint();
+  delay(5000);
 }
 
 SquareState ReadSquare(uint8_t rowChannel, uint8_t colChannel) {
-  rowMux.SetChannel(rowChannel);
-  colMux.SetChannel(colChannel);
+  gndMux.SetChannel(rowChannel);
+  delay(2);
+  sigMux.SetChannel(rowChannel);
+  delay(2);
+  vccMux.SetChannel(colChannel);
+  delay(2);
 
-  uint8_t rowVal = rowMux.Read();
-  uint8_t colVal = colMux.Read();
+  uint8_t val = sigMux.Read();
+  PRINT(val);
+  PRINT(' ');
 
-  if (rowVal > upperThresh && colVal > upperThresh)
+  if (val < 70)
     return SquareState::White;
-  else if (rowVal < lowerThresh && colVal < lowerThresh)
+  else if (val < 150)
     return SquareState::Black;
   return SquareState::None;
 }
