@@ -79,11 +79,11 @@ public:
   }
 
   void PackTransmitData(unsigned char *packedData) {
-    memset(packedData, 0, sizeof(packedData));
+    memset(packedData, 0, 16);
 
     for (int row = 0; row < 8; row++) {
       for (int col = 0; col < 8; col++) {
-        SquareState val = board[row][col];
+        SquareState val = board[7 - row][col];
         int byteIndex = row * 2 + (col / 4);
         int bitOffset = (col % 4) * 2;
 

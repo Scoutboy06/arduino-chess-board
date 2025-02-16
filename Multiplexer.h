@@ -13,7 +13,8 @@ private:
   MuxMode _mode;
 
 public:
-  Multiplexer(const uint8_t (&digitalPins)[NUM_PINS], MuxMode mode = NONE, uint8_t analogPin = 0)
+  Multiplexer(const uint8_t (&digitalPins)[NUM_PINS], MuxMode mode = NONE,
+              uint8_t analogPin = 0)
       : _analogPin(analogPin), _mode(mode) {
     for (uint8_t i = 0; i < NUM_PINS; ++i) {
       _digitalPins[i] = digitalPins[i];
@@ -39,7 +40,7 @@ public:
     }
   }
 
-  uint8_t Read() {
+  int Read() {
     if (_mode == IN) {
       return analogRead(_analogPin);
     }
